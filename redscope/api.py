@@ -1,5 +1,7 @@
+# this file parses openai and swagger schema definitions into standardized data classes
 from dataclasses import dataclass, field
 
+# this one represent individual routes
 @dataclass
 class Apioperation:
     path: str
@@ -8,6 +10,7 @@ class Apioperation:
     parameters: list[str] = field(default_factory=list)
     auth_required: bool = False
 
+#this one is a top level container storing metadata 
 @dataclass
 class ApiSpec:
     title: str = ""
@@ -16,7 +19,7 @@ class ApiSpec:
     operations: list[Apioperation] = field(default_factory=list)
 
 
-
+# and this is a core/ head logic of this file so what it does resolves an base_url across schema versions and it iterates over schema path , validates http verbs against standard methods and normalizes them into Apioperation entries
 def parse_api(data: dict )-> ApiSpec:
     base_url = ""
     servers = data.get("servers", [])
