@@ -1,5 +1,5 @@
 from redscope.db import init_db, create_project, save_resource
-from redscope.cli import project, handle_graph, handle_diff, handle_api
+from redscope.cli import project, handle_graph, handle_diff, handle_api, handle_crawl
 import argparse
 import json
 from pathlib import Path
@@ -50,3 +50,17 @@ def test_api(tmp_path):
     assert fetch_2 == 1   
 
 
+def test_api_not_found(tmp_path):
+    init = init_db(":memory:")
+    path = tmp_path / "nonexistent.json"
+    parse = argparse.Namespace(file=str(path))
+    handle_api(init, parse)
+    fetch = init.execute("SELECT count(*) FROM api_spec").fetchone()[0]
+    assert fetch == 0
+
+def test_crawl():
+    init = init_db(":memory:")
+    parse = argparse.Namespace(target="ftp://invalid.com", project="scan", max_pages=10, max_depth=2)
+    result = handle_crawl(init, parse)
+    assert result.startswith("[-] error")
+    
